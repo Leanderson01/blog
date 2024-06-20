@@ -1,24 +1,36 @@
 "use client";
 
+import { Select } from "@mantine/core";
 import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
-import { ChangeEvent } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LanguageSwitcher() {
   const router = useRouter();
+  const localActive = useLocale();
+  const [selectedLanguage, setSelectedLanguage] = useState(localActive);
+  const pathname = usePathname();
 
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const nextLocale = event.target.value;
-
-    router.replace(`/${nextLocale}`);
+  const handleChange = (value: string | null) => {
+    if (value) {
+      setSelectedLanguage(value);
+      if (value !== localActive) {
+        const newPath = pathname.replace(`/${localActive}`, `/${value}`);
+        router.replace(newPath);
+      }
+    } else {
+      setSelectedLanguage(localActive);
+    }
   };
 
-  const localActive = useLocale();
-
   return (
-    <select onChange={handleChange} defaultValue={localActive}>
-      <option value="en">English</option>
-      <option value="pt-BR">Português</option>
-    </select>
+    <Select
+      value={selectedLanguage}
+      onChange={handleChange}
+      data={[
+        { value: "en", label: "English" },
+        { value: "pt-BR", label: "Português" },
+      ]}
+    />
   );
 }
